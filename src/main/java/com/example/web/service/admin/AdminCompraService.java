@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import java.math.RoundingMode; 
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -84,7 +85,9 @@ public class AdminCompraService {
       subtotal = subtotal.add(line);
     }
 
-    BigDecimal igv = subtotal.multiply(IGV_RATE).setScale(2, BigDecimal.ROUND_HALF_UP);
+    //BigDecimal igv = subtotal.multiply(IGV_RATE).setScale(2, BigDecimal.ROUND_HALF_UP);
+    
+    BigDecimal igv = subtotal.multiply(IGV_RATE).setScale(2, RoundingMode.HALF_UP);
     BigDecimal total = subtotal.add(igv);
 
     compra.setSubtotal(subtotal);

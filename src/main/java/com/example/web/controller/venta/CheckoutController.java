@@ -29,16 +29,15 @@ public class CheckoutController {
             HttpSession session) {
 
         try {
-            // 1) Validar sesión y obtener SessionUser
+            // Validar sesión y obtener SessionUser
             var su = guard.requireCliente(session);
 
-            // 2) Pasar idUsuario al servicio (NO email)
             CheckoutResponse response =
                 checkoutService.realizarCheckout(request, su.getIdUsuario());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (ResponseStatusException e) { // lanzada por el guard
+        } catch (ResponseStatusException e) { 
             return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
