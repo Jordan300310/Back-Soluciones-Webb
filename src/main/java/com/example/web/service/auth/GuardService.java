@@ -51,4 +51,15 @@ public class GuardService {
       return false;
     }
   }
+
+  /**Debe ser CLIENTE.
+    Verifica la sesión y el rol. Si es exitoso, devuelve el SessionUser.
+  */
+  public SessionUser requireCliente(HttpSession session) {
+    SessionUser su = requireSesion(session); 
+    if (su.getRoles() == null || !su.getRoles().contains("CLIENTE")) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo clientes");
+    }
+    return su;
+  }
 }

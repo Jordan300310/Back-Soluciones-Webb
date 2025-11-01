@@ -27,6 +27,11 @@ public class Cliente {
   @Column(length = 150) private String email;
   private LocalDate fen;                     // fecha nacimiento
 
+  @Column(name="direccion") private String direccion;
+  @Column(name = "ciudad") private String ciudad;
+  @Column(name = "pais") private String pais;
+  @Column(name = "codigo_postal") private String codigoPostal;
+
   @Column(nullable = false)
   private Boolean estado = true;
 }
