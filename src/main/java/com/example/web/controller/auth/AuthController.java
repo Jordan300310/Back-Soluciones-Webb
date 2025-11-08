@@ -1,14 +1,13 @@
 package com.example.web.controller.auth;
 
-import jakarta.servlet.http.HttpSession;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import com.example.web.dto.auth.LoginRequest;
 import com.example.web.dto.auth.LoginResponse;
+import com.example.web.dto.auth.MeResponse;
 import com.example.web.dto.auth.RegisterRequest;
 import com.example.web.dto.auth.RegisterResponse;
-import com.example.web.models.auth.SessionUser;
 import com.example.web.service.auth.AuthService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -27,18 +26,19 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpSession session) {
-    return ResponseEntity.ok(authService.login(request, session));
+  public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    return ResponseEntity.ok(authService.login(request));
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<Void> logout(HttpSession session) {
-    authService.logout(session);
+  public ResponseEntity<Void> logout() {
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/me")
-  public ResponseEntity<SessionUser> me(HttpSession session) {
-    return ResponseEntity.ok(authService.me(session));
+  public ResponseEntity<MeResponse> me(
+      @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    var me = authService.me(authHeader);
+    return ResponseEntity.ok(me);
   }
 }

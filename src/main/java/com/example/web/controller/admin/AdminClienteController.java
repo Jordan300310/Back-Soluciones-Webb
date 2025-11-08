@@ -6,7 +6,7 @@ import com.example.web.dto.admin.ClienteAdminDTO;
 import com.example.web.dto.admin.UpdateClienteRequest;
 import com.example.web.service.admin.AdminClienteService;
 import com.example.web.service.auth.GuardService;
-import jakarta.servlet.http.HttpSession;
+
 import java.util.List;
 
 @RestController
@@ -22,14 +22,14 @@ public class AdminClienteController {
   }
 
   @GetMapping
-  public List<ClienteAdminDTO> list(HttpSession session) {
-    guard.requireEmpleado(session); // empleado o admin
+  public List<ClienteAdminDTO> list(@RequestHeader(name = "Authorization", required = false)String authHeader) {
+    guard.requireEmpleado(authHeader); // empleado o admin
     return service.list();
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ClienteAdminDTO> get(@PathVariable Long id, HttpSession session) {
-    guard.requireEmpleado(session);
+  public ResponseEntity<ClienteAdminDTO> get(@PathVariable Long id, @RequestHeader(name = "Authorization", required = false)String authHeader) {
+    guard.requireEmpleado(authHeader);
     var dto = service.get(id);
     return (dto == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(dto);
   }
@@ -37,15 +37,15 @@ public class AdminClienteController {
   @PatchMapping("/{id}")
   public ResponseEntity<ClienteAdminDTO> update(@PathVariable Long id,
                                                 @RequestBody UpdateClienteRequest body,
-                                                HttpSession session) {
-    guard.requireAdmin(session); // solo admin
+                                                @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireAdmin(authHeader); // solo admin
     var dto = service.update(id, body);
     return ResponseEntity.ok(dto);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable Long id, HttpSession session) {
-    guard.requireAdmin(session);
+  public ResponseEntity<Void> delete(@PathVariable Long id, @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireAdmin(authHeader);
     service.delete(id);
     return ResponseEntity.noContent().build();
   }

@@ -11,11 +11,10 @@ public record UpdateClienteRequest(
   String cel,
   String email,
   LocalDate fen,
-  Boolean clienteEstado,
+
 
   // USUARIO
-  String username,
-  String password,       // SIN hash (por ahora)
-  Boolean usuarioEstado
+  String username
+
 ) {}
 

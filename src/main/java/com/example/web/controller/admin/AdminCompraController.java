@@ -5,7 +5,6 @@ import com.example.web.dto.compra.CompraCreatedDTO;
 import com.example.web.dto.compra.CompraListDTO;
 import com.example.web.service.admin.AdminCompraService;
 import com.example.web.service.auth.GuardService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,15 +24,15 @@ public class AdminCompraController {
   }
 
   @PostMapping
-  public ResponseEntity<CompraCreatedDTO> crear(@RequestBody CompraRequest body, HttpSession session) {
-    guard.requireEmpleado(session); // empleado o admin
+  public ResponseEntity<CompraCreatedDTO> crear(@RequestBody CompraRequest body,@RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireEmpleado(authHeader); // empleado o admin
     var dto = service.crear(body);
     return ResponseEntity.created(URI.create("/admin/compras/" + dto.idCompra())).body(dto);
   }
 
   @GetMapping
-  public List<CompraListDTO> listar(HttpSession session) {
-    guard.requireEmpleado(session);
+  public List<CompraListDTO> listar(@RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireEmpleado(authHeader);
     return service.listar();
   }
 }

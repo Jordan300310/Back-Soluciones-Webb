@@ -1,6 +1,5 @@
 package com.example.web.controller.admin;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.web.dto.admin.ProductoAdminDTO;
@@ -24,21 +23,21 @@ public class AdminProductoController {
   }
 
   @PostMapping
-  public ResponseEntity<ProductoAdminDTO> create(@RequestBody Producto body, HttpSession session) {
-    guard.requireAdmin(session);
+  public ResponseEntity<ProductoAdminDTO> create(@RequestBody Producto body,@RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireAdmin(authHeader);
     var p = service.create(body);
     return ResponseEntity.created(URI.create("/admin/productos/" + p.getId())).body(ProductoAdminDTO.of(p));
   }
 
   @GetMapping
-  public List<ProductoAdminDTO> list(HttpSession session) {
-    guard.requireEmpleado(session);
+  public List<ProductoAdminDTO> list(@RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireEmpleado(authHeader);
     return service.list().stream().map(ProductoAdminDTO::of).toList();
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ProductoAdminDTO> get(@PathVariable Long id, HttpSession session) {
-    guard.requireEmpleado(session);
+  public ResponseEntity<ProductoAdminDTO> get(@PathVariable Long id, @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireEmpleado(authHeader);
     var p = service.get(id);
     return (p == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(ProductoAdminDTO.of(p));
   }
@@ -46,15 +45,15 @@ public class AdminProductoController {
   @PatchMapping("/{id}")
   public ResponseEntity<ProductoAdminDTO> update(@PathVariable Long id,
                                                  @RequestBody Producto body,
-                                                 HttpSession session) {
-    guard.requireAdmin(session);
+                                                 @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireAdmin(authHeader);
     var p = service.update(id, body);
     return (p == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(ProductoAdminDTO.of(p));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable Long id, HttpSession session) {
-    guard.requireAdmin(session);
+  public ResponseEntity<Void> delete(@PathVariable Long id, @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    guard.requireAdmin(authHeader);
     service.delete(id);
     return ResponseEntity.noContent().build();
   }

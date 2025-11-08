@@ -14,10 +14,7 @@ public record UpdateEmpleadoRequest(
   LocalDate fen,
   String cargo,
   BigDecimal sueldo,
-  Boolean empleadoEstado,
 
   // USUARIO
-  String username,
-  String password,
-  Boolean usuarioEstado
+  String username
 ) {}

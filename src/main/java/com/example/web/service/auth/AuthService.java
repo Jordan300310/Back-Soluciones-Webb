@@ -1,21 +1,20 @@
 package com.example.web.service.auth;
 
-import jakarta.servlet.http.HttpSession;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.example.web.dto.auth.LoginRequest;
 import com.example.web.dto.auth.LoginResponse;
+import com.example.web.dto.auth.MeResponse;
 import com.example.web.dto.auth.RegisterRequest;
 import com.example.web.dto.auth.RegisterResponse;
 import com.example.web.models.auth.Cliente;
-import com.example.web.models.auth.SessionUser;
 import com.example.web.models.auth.Usuario;
 import com.example.web.repository.auth.ClienteRepository;
 import com.example.web.repository.auth.EmpleadoRepository;
 import com.example.web.repository.auth.UsuarioRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,36 +22,40 @@ import java.util.List;
 @Service
 public class AuthService {
 
-  public static final String SESSION_KEY = "SESSION_USER";
-
   private final UsuarioRepository usuarioRepo;
   private final ClienteRepository clienteRepo;
   private final EmpleadoRepository empleadoRepo;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
 
   public AuthService(UsuarioRepository usuarioRepo,
                      ClienteRepository clienteRepo,
-                     EmpleadoRepository empleadoRepo) {
+                     EmpleadoRepository empleadoRepo,
+                     PasswordEncoder passwordEncoder,
+                     JwtService jwtService) {
     this.usuarioRepo = usuarioRepo;
     this.clienteRepo = clienteRepo;
     this.empleadoRepo = empleadoRepo;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtService = jwtService;
   }
 
-  // ====== REGISTER (usuario + cliente con datos completos) ======
+  // ====== REGISTER (CLIENTE) ======
   @Transactional
   public RegisterResponse registerCliente(RegisterRequest r) {
     if (r.username() == null || r.username().isBlank())
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username requerido");
     if (usuarioRepo.findByUsernameIgnoreCase(r.username()).isPresent())
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username ya registrado");
+    if (r.password() == null || r.password().isBlank())
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password requerida");
 
-    // Usuario (SIN hash por ahora)
     Usuario u = new Usuario();
     u.setUsername(r.username());
-    u.setPassword(r.password() == null ? "" : r.password());
+    u.setPassword(passwordEncoder.encode(r.password()));  // HASH
     u.setEstado(true);
     usuarioRepo.save(u);
 
-    // Cliente con datos personales
     Cliente c = new Cliente();
     c.setIdUsuario(u.getId());
     c.setNom(r.nombres());
@@ -70,12 +73,11 @@ public class AuthService {
 
   // ====== LOGIN ======
   @Transactional(readOnly = true)
-  public LoginResponse login(LoginRequest req, HttpSession session) {
+  public LoginResponse login(LoginRequest req) {
     Usuario user = usuarioRepo.findByUsernameIgnoreCase(req.username())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
 
-    // SIN hash por ahora
-    if (!user.getPassword().equals(req.password()))
+    if (!passwordEncoder.matches(req.password(), user.getPassword()))
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
 
     if (!Boolean.TRUE.equals(user.getEstado()))
@@ -88,21 +90,19 @@ public class AuthService {
     if (roles.isEmpty())
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuario sin rol");
 
-    SessionUser su = new SessionUser(user.getId(), user.getUsername(), roles, true);
-    session.setAttribute(SESSION_KEY, su);
+    boolean enabled = true;
 
-    return new LoginResponse("Login exitoso", roles);
+    String token = jwtService.generateToken(uid, user.getUsername(), roles, enabled);
+
+    return new LoginResponse("Login exitoso", roles, token);
   }
 
-  // ====== LOGOUT ======
-  public void logout(HttpSession session) {
-    session.invalidate();
-  }
+  // ====== ME (a partir de Authorization: Bearer xxx) ======
+  public MeResponse me(String authHeader) {
+    if (authHeader == null || !authHeader.startsWith("Bearer "))
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requerido");
 
-  // ====== ME ======
-  public SessionUser me(HttpSession session) {
-    Object o = session.getAttribute(SESSION_KEY);
-    if (o == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sin sesión");
-    return (SessionUser) o;
+    String token = authHeader.substring(7);
+    return jwtService.parseToken(token);
   }
 }

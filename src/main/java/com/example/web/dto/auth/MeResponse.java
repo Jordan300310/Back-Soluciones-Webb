@@ -2,8 +2,9 @@ package com.example.web.dto.auth;
 
 import java.util.List;
 
-public record LoginResponse(
-    String message,
+public record MeResponse(
+    Long idUsuario,
+    String username,
     List<String> roles,
-    String token
+    boolean enabled
 ) {}

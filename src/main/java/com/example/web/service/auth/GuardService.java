@@ -1,65 +1,69 @@
 package com.example.web.service.auth;
 
-import jakarta.servlet.http.HttpSession;
+import com.example.web.dto.auth.MeResponse;
+import com.example.web.models.auth.Empleado;
+import com.example.web.repository.auth.EmpleadoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import com.example.web.models.auth.Empleado;
-import com.example.web.models.auth.SessionUser;
-import com.example.web.repository.auth.EmpleadoRepository;
 
 @Service
 public class GuardService {
 
+  private final JwtService jwtService;
   private final EmpleadoRepository empleadoRepo;
 
-  public GuardService(EmpleadoRepository empleadoRepo) {
+  public GuardService(JwtService jwtService,
+                      EmpleadoRepository empleadoRepo) {
+    this.jwtService = jwtService;
     this.empleadoRepo = empleadoRepo;
   }
 
-  public SessionUser requireSesion(HttpSession session) {
-    Object o = session.getAttribute(AuthService.SESSION_KEY);
-    if (o == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Inicia sesión");
-    return (SessionUser) o;
+  private MeResponse parseAuthHeader(String authHeader) {
+    if (authHeader == null || !authHeader.startsWith("Bearer "))
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requerido");
+    String token = authHeader.substring(7);
+    return jwtService.parseToken(token);
+  }
+
+  public MeResponse requireUser(String authHeader) {
+    return parseAuthHeader(authHeader);
   }
 
   /** Debe ser EMPLEADO (o ADMIN). */
-  public Empleado requireEmpleado(HttpSession session) {
-    SessionUser su = requireSesion(session);
-    if (su.getRoles() == null || !su.getRoles().contains("EMPLEADO")) {
+  public Empleado requireEmpleado(String authHeader) {
+    MeResponse me = parseAuthHeader(authHeader);
+    if (me.roles() == null || !me.roles().contains("EMPLEADO")) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo empleados");
     }
-    return empleadoRepo.findByIdUsuario(su.getIdUsuario())
+    return empleadoRepo.findByIdUsuario(me.idUsuario())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Empleado no encontrado"));
   }
 
   /** Debe ser ADMIN (Empleado con cargo ADMIN). */
-  public Empleado requireAdmin(HttpSession session) {
-    Empleado emp = requireEmpleado(session);
+  public Empleado requireAdmin(String authHeader) {
+    Empleado emp = requireEmpleado(authHeader);
     if (emp.getCargo() == null || !emp.getCargo().equalsIgnoreCase("ADMIN")) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo administradores");
     }
     return emp;
   }
 
-  /** true si es ADMIN, false si solo EMPLEADO. */
-  public boolean isAdmin(HttpSession session) {
+  public boolean isAdmin(String authHeader) {
     try {
-      requireAdmin(session);
+      requireAdmin(authHeader);
       return true;
     } catch (ResponseStatusException ex) {
       return false;
     }
   }
 
-  /**Debe ser CLIENTE.
-    Verifica la sesión y el rol. Si es exitoso, devuelve el SessionUser.
-  */
-  public SessionUser requireCliente(HttpSession session) {
-    SessionUser su = requireSesion(session); 
-    if (su.getRoles() == null || !su.getRoles().contains("CLIENTE")) {
+  /** Debe ser CLIENTE. */
+  public MeResponse requireCliente(String authHeader) {
+    MeResponse me = parseAuthHeader(authHeader);
+    if (me.roles() == null || !me.roles().contains("CLIENTE")) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo clientes");
     }
-    return su;
+    return me;
   }
 }

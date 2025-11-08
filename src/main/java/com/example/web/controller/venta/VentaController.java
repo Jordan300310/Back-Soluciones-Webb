@@ -3,7 +3,7 @@ package com.example.web.controller.venta;
 import com.example.web.dto.venta.ComprobanteDTO;
 import com.example.web.service.auth.GuardService;
 import com.example.web.service.venta.CheckoutService;
-import jakarta.servlet.http.HttpSession;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,14 +21,15 @@ public class VentaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getVentaById(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<?> getVentaById(
+            @PathVariable Long id,
+            @RequestHeader(name = "Authorization", required = false) String authHeader) {
         try {
-            // 1) Debe ser CLIENTE y obtener su SessionUser
-            var su = guard.requireCliente(session);
+            // 1) Debe ser CLIENTE
+            var su = guard.requireCliente(authHeader);
 
-
-            // 2) Pasar idUsuario al servicio (el servicio valida pertenencia)
-            ComprobanteDTO dto = checkoutService.getVentaComoCliente(id, su.getIdUsuario());
+            // 2) Validar pertenencia usando idUsuario
+            ComprobanteDTO dto = checkoutService.getVentaComoCliente(id, su.idUsuario());
             return ResponseEntity.ok(dto);
 
         } catch (ResponseStatusException e) {

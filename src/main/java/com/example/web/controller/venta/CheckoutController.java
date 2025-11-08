@@ -1,6 +1,5 @@
 package com.example.web.controller.venta;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +24,16 @@ public class CheckoutController {
 
     @PostMapping
     public ResponseEntity<?> realizarCheckout(
-            @RequestBody CheckoutRequest request,
-            HttpSession session) {
+            @RequestHeader(name = "Authorization", required = false) String authHeader,
+            @RequestBody CheckoutRequest request) {
 
         try {
-            // 1) Validar sesión y obtener SessionUser
-            var su = guard.requireCliente(session);
+            // 1) Validar JWT y rol CLIENTE
+            var su = guard.requireCliente(authHeader);
 
-            // 2) Pasar idUsuario al servicio (NO email)
+            // 2) Pasar idUsuario al servicio (o idCliente si tu servicio lo espera así)
             CheckoutResponse response =
-                checkoutService.realizarCheckout(request, su.getIdUsuario());
+                checkoutService.realizarCheckout(request, su.idUsuario());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
