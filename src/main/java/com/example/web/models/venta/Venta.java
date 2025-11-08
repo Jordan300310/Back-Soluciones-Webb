@@ -18,8 +18,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "venta")
 public class Venta {
@@ -45,57 +50,5 @@ public class Venta {
     // Relación con Comprobante: Una venta tiene un comprobante
     @OneToOne(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Comprobante comprobante;
-
-    public Venta() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getFechaVenta() {
-        return fechaVenta;
-    }
-
-    public void setFechaVenta(LocalDateTime fechaVenta) {
-        this.fechaVenta = fechaVenta;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public List<VentaItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<VentaItem> items) {
-        this.items = items;
-    }
-
-    public Comprobante getComprobante() {
-        return comprobante;
-    }
-
-    public void setComprobante(Comprobante comprobante) {
-        this.comprobante = comprobante;
-    }
-
-    
+ 
 }
