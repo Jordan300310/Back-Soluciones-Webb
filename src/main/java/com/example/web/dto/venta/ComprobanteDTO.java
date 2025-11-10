@@ -13,6 +13,7 @@ public class ComprobanteDTO {
     private BigDecimal total;
     private String clienteNombre;
 
+
     public ComprobanteDTO(Long ventaId, String serie, String numero, 
                           LocalDateTime fecha, BigDecimal subtotal, 
                           BigDecimal igv, BigDecimal total, String clienteNombre) {

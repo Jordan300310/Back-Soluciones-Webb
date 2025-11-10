@@ -24,7 +24,7 @@ public class JwtService {
 
   public String generateToken(Long idUsuario, String username, List<String> roles, boolean enabled) {
     Date now = new Date();
-    Date exp = new Date(now.getTime() + 1000L * 60 * 60); // 1 hora
+    Date exp = new Date(now.getTime() + 1000L * 60 * 60); 
 
     return Jwts.builder()
         .setSubject(idUsuario.toString())

@@ -37,6 +37,10 @@ public class Venta {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal total;
+    @Column(name="direccion") private String direccion;
+    @Column(name = "ciudad") private String ciudad;
+    @Column(name = "pais") private String pais;
+    @Column(name = "codigo_postal") private String codigoPostal;
 
     // Relación con Cliente: Una venta pertenece a un cliente
     @ManyToOne(fetch = FetchType.LAZY)

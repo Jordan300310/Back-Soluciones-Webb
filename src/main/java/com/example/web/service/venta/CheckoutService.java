@@ -53,18 +53,14 @@ public class CheckoutService {
         // 1) Buscar Cliente por idUsuario (no por email)
         Cliente cliente = clienteRepository.findByIdUsuario(idUsuario)
             .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-
-        // 2) Actualizar datos de envío
-        cliente.setDireccion(request.getDireccion());
-        cliente.setCiudad(request.getCiudad());
-        cliente.setPais(request.getPais());
-        cliente.setCodigoPostal(request.getCodigoPostal());
-        clienteRepository.save(cliente);
-
         // 3) Crear Venta
         Venta nuevaVenta = new Venta();
         nuevaVenta.setCliente(cliente);
         nuevaVenta.setFechaVenta(LocalDateTime.now());
+        nuevaVenta.setDireccion(request.getDireccion());
+        nuevaVenta.setCiudad(request.getCiudad());
+        nuevaVenta.setPais(request.getPais());
+        nuevaVenta.setCodigoPostal(request.getCodigoPostal());
 
         BigDecimal totalVenta = BigDecimal.ZERO;
         List<VentaItem> itemsParaGuardar = new ArrayList<>();
@@ -104,6 +100,7 @@ public class CheckoutService {
         comprobante.setRucEmisor("10203040501");
         comprobante.setSerie("B001");
         comprobante.setNumero(String.format("%08d", ventaGuardada.getId()));
+
 
         BigDecimal subtotal = totalVenta.divide(IGV_RATE.add(BigDecimal.ONE), 2, RoundingMode.HALF_UP);
         BigDecimal igv = totalVenta.subtract(subtotal);
