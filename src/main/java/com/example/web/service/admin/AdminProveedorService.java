@@ -26,7 +26,7 @@ public class AdminProveedorService {
 
   @Transactional(readOnly = true)
   public List<Proveedor> list() {
-    return repo.findAll();
+    return repo.findByEstadoTrue();
   }
 
   @Transactional(readOnly = true)

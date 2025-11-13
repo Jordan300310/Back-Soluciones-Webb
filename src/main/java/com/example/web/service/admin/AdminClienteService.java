@@ -11,7 +11,7 @@ import com.example.web.models.auth.Cliente;
 import com.example.web.models.auth.Usuario;
 import com.example.web.repository.auth.ClienteRepository;
 import com.example.web.repository.auth.UsuarioRepository;
-
+import java.util.Objects;
 import java.util.List;
 
 @Service
@@ -26,14 +26,26 @@ public class AdminClienteService {
   }
 
   @Transactional(readOnly = true)
-  public List<ClienteAdminDTO> list() {
-    return clienteRepo.findAll().stream().map(c -> {
-      Usuario u = (c.getIdUsuario() != null)
-          ? usuarioRepo.findById(c.getIdUsuario()).orElse(null)
-          : null;
-      return ClienteAdminDTO.of(c, u);
-    }).toList();
-  }
+public List<ClienteAdminDTO> list() {
+  return clienteRepo.findByEstadoTrue().stream()        // 👈 solo clientes activos
+      .map(c -> {
+        if (c.getIdUsuario() == null) {
+          return null; // si no tiene usuario, no lo listamos
+        }
+
+        Usuario u = usuarioRepo
+            .findByIdAndEstadoTrue(c.getIdUsuario())    // 👈 solo usuario activo
+            .orElse(null);
+
+        if (u == null) {
+          return null;  // usuario inactivo o no encontrado ⇒ no se lista
+        }
+
+        return ClienteAdminDTO.of(c, u);
+      })
+      .filter(Objects::nonNull)                         // quitamos los null
+      .toList();
+}
 
   @Transactional(readOnly = true)
   public ClienteAdminDTO get(Long id) {

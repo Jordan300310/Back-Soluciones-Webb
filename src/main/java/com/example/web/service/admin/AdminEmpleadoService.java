@@ -13,7 +13,7 @@ import com.example.web.models.auth.Empleado;
 import com.example.web.models.auth.Usuario;
 import com.example.web.repository.auth.EmpleadoRepository;
 import com.example.web.repository.auth.UsuarioRepository;
-
+import java.util.Objects;
 import java.util.List;
 
 @Service
@@ -66,15 +66,23 @@ public class AdminEmpleadoService {
     return EmpleadoAdminDTO.of(e, u);
   }
 
-  @Transactional(readOnly = true)
-  public List<EmpleadoAdminDTO> list() {
-    return empleadoRepo.findAll().stream().map(e -> {
-      Usuario u = (e.getIdUsuario() != null)
-          ? usuarioRepo.findById(e.getIdUsuario()).orElse(null)
-          : null;
-      return EmpleadoAdminDTO.of(e, u);
-    }).toList();
-  }
+@Transactional(readOnly = true)
+public List<EmpleadoAdminDTO> list() {
+  return empleadoRepo.findByEstadoTrue().stream()   // 👈 solo empleados activos
+      .map(e -> {
+        Long idUsuario = e.getIdUsuario();
+        if (idUsuario == null) {
+          return null; // si no tiene usuario, no lo listamos
+        }
+
+        return usuarioRepo
+            .findByIdAndEstadoTrue(idUsuario)       // 👈 solo usuario activo
+            .map(u -> EmpleadoAdminDTO.of(e, u))
+            .orElse(null);
+      })
+      .filter(Objects::nonNull)                      // quitamos los null
+      .toList();
+}
 
   @Transactional(readOnly = true)
   public EmpleadoAdminDTO get(Long id) {

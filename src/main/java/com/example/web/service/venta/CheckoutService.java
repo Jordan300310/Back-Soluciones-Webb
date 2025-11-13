@@ -50,10 +50,8 @@ public class CheckoutService {
     @Transactional
     public CheckoutResponse realizarCheckout(CheckoutRequest request, Long idUsuario) {
 
-        // 1) Buscar Cliente por idUsuario (no por email)
         Cliente cliente = clienteRepository.findByIdUsuario(idUsuario)
             .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-        // 3) Crear Venta
         Venta nuevaVenta = new Venta();
         nuevaVenta.setCliente(cliente);
         nuevaVenta.setFechaVenta(LocalDateTime.now());
@@ -65,7 +63,6 @@ public class CheckoutService {
         BigDecimal totalVenta = BigDecimal.ZERO;
         List<VentaItem> itemsParaGuardar = new ArrayList<>();
 
-        // 4) Validar stock, crear items y acumular totales
         for (VentaItemRequest itemReq : request.getItems()) {
             Producto producto = productoRepository.findById(itemReq.getProductoId())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + itemReq.getProductoId()));

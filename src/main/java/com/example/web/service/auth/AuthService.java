@@ -43,19 +43,57 @@ public class AuthService {
   // ====== REGISTER (CLIENTE) ======
   @Transactional
   public RegisterResponse registerCliente(RegisterRequest r) {
+
     if (r.username() == null || r.username().isBlank())
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username requerido");
+
     if (usuarioRepo.findByUsernameIgnoreCase(r.username()).isPresent())
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username ya registrado");
+
     if (r.password() == null || r.password().isBlank())
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password requerida");
 
+    if (r.password().length() < 6)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El password debe tener al menos 6 caracteres");
+
+    if (r.nombres() == null || r.nombres().isBlank())
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombres requeridos");
+
+    if (r.apat() == null || r.apat().isBlank())
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Apellido paterno requerido");
+
+    if (r.dni() == null || r.dni().isBlank())
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DNI requerido");
+
+    if (!r.dni().matches("\\d{8}"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DNI inválido, debe tener 8 dígitos numéricos");
+
+    if (clienteRepo.existsByDni(r.dni()))
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "DNI ya registrado");
+
+    if (r.email() == null || r.email().isBlank())
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email requerido");
+
+    if (!r.email().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email con formato inválido");
+
+    if (clienteRepo.existsByEmailIgnoreCase(r.email()))
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ya registrado");
+
+    if (r.cel() != null && !r.cel().isBlank() && !r.cel().matches("\\d{9}"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Celular inválido, debe tener 9 dígitos numéricos");
+
+    if (r.fen() == null)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fecha de nacimiento requerida");
+
+    // --------- CREACIÓN DE USUARIO ---------
     Usuario u = new Usuario();
     u.setUsername(r.username());
     u.setPassword(passwordEncoder.encode(r.password()));  // HASH
     u.setEstado(true);
     usuarioRepo.save(u);
 
+    // --------- CREACIÓN DE CLIENTE ---------
     Cliente c = new Cliente();
     c.setIdUsuario(u.getId());
     c.setNom(r.nombres());
