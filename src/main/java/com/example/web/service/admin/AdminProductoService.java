@@ -37,9 +37,9 @@ public class AdminProductoService {
             .toList();
     }
 
-  @Transactional(readOnly = true)
+   @Transactional(readOnly = true)
   public List<Producto> list() {
-    return repo.findAll();
+    return repo.findByEstadoTrue();
   }
 
   @Transactional(readOnly = true)

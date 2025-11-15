@@ -8,4 +8,5 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
   List<Empleado> findByEstadoTrue();
   boolean existsByIdUsuario(Long idUsuario);
   Optional<Empleado> findByIdUsuario(Long idUsuario);
+  Optional<Empleado> findByDni(String dni); 
 }

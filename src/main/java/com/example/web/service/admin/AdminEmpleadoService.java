@@ -31,40 +31,52 @@ public class AdminEmpleadoService {
     this.passwordEncoder = passwordEncoder;
   }
 
-  // Crear Empleado + Usuario
   @Transactional
-  public EmpleadoAdminDTO crear(CrearEmpleadoRequest r) {
-    if (r.username() == null || r.username().isBlank())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username requerido");
-    if (usuarioRepo.findByUsernameIgnoreCase(r.username()).isPresent())
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Username ya registrado");
+public EmpleadoAdminDTO crear(CrearEmpleadoRequest r) {
+  if (r.username() == null || r.username().isBlank())
+    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username requerido");
+  if (usuarioRepo.findByUsernameIgnoreCase(r.username()).isPresent())
+    throw new ResponseStatusException(HttpStatus.CONFLICT, "Username ya registrado");
 
-    if (r.password() == null || r.password().isBlank())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password requerida");
+  if (r.password() == null || r.password().isBlank())
+    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password requerida");
 
-    Usuario u = new Usuario();
-    u.setUsername(r.username());
-    // HASH de password al crear
-    u.setPassword(passwordEncoder.encode(r.password()));
-    u.setEstado(true);
-    usuarioRepo.save(u);
-
-    Empleado e = new Empleado();
-    e.setIdUsuario(u.getId());
-    e.setNom(r.nom());
-    e.setApat(r.apat());
-    e.setAmat(r.amat());
-    e.setDni(r.dni());
-    e.setCel(r.cel());
-    e.setEmail(r.email());
-    e.setFen(r.fen());
-    e.setCargo(r.cargo());
-    e.setSueldo(r.sueldo());
-    e.setEstado(true);
-    empleadoRepo.save(e);
-
-    return EmpleadoAdminDTO.of(e, u);
+  if (r.email() != null && !r.email().isBlank()) {
+    String email = r.email().trim();
+    if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email inválido");
+    }
   }
+
+  if (r.dni() != null && !r.dni().isBlank()) {
+    String dni = r.dni().trim();
+    if (empleadoRepo.findByDni(dni).isPresent()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "DNI ya registrado");
+    }
+  }
+
+  Usuario u = new Usuario();
+  u.setUsername(r.username());
+  u.setPassword(passwordEncoder.encode(r.password())); // HASH
+  u.setEstado(true);
+  usuarioRepo.save(u);
+
+  Empleado e = new Empleado();
+  e.setIdUsuario(u.getId());
+  e.setNom(r.nom());
+  e.setApat(r.apat());
+  e.setAmat(r.amat());
+  e.setDni(r.dni());
+  e.setCel(r.cel());
+  e.setEmail(r.email());
+  e.setFen(r.fen());
+  e.setCargo(r.cargo());
+  e.setSueldo(r.sueldo());
+  e.setEstado(true);
+  empleadoRepo.save(e);
+
+  return EmpleadoAdminDTO.of(e, u);
+}
 
 @Transactional(readOnly = true)
 public List<EmpleadoAdminDTO> list() {
@@ -99,7 +111,6 @@ public List<EmpleadoAdminDTO> list() {
     Empleado e = empleadoRepo.findById(id).orElseThrow(() ->
         new ResponseStatusException(HttpStatus.NOT_FOUND, "Empleado no encontrado"));
 
-    // EMPLEADO: solo datos, SIN estado
     if (in.nom() != null)   e.setNom(in.nom());
     if (in.apat() != null)  e.setApat(in.apat());
     if (in.amat() != null)  e.setAmat(in.amat());
