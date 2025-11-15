@@ -135,7 +135,6 @@ public class AuthService {
     return new LoginResponse("Login exitoso", roles, token);
   }
 
-  // ====== ME (a partir de Authorization: Bearer xxx) ======
   public MeResponse me(String authHeader) {
     if (authHeader == null || !authHeader.startsWith("Bearer "))
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requerido");

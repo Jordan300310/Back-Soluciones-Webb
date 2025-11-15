@@ -68,19 +68,19 @@ public class AdminEmpleadoService {
 
 @Transactional(readOnly = true)
 public List<EmpleadoAdminDTO> list() {
-  return empleadoRepo.findByEstadoTrue().stream()   // 👈 solo empleados activos
+  return empleadoRepo.findByEstadoTrue().stream()  
       .map(e -> {
         Long idUsuario = e.getIdUsuario();
         if (idUsuario == null) {
-          return null; // si no tiene usuario, no lo listamos
+          return null;
         }
 
         return usuarioRepo
-            .findByIdAndEstadoTrue(idUsuario)       // 👈 solo usuario activo
+            .findByIdAndEstadoTrue(idUsuario)      
             .map(u -> EmpleadoAdminDTO.of(e, u))
             .orElse(null);
       })
-      .filter(Objects::nonNull)                      // quitamos los null
+      .filter(Objects::nonNull)                  
       .toList();
 }
 

@@ -3,6 +3,7 @@ package com.example.web.controller.admin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.web.dto.admin.ProductoAdminDTO;
+import com.example.web.dto.common.ComboDTO;
 import com.example.web.models.Producto.Producto;
 import com.example.web.service.auth.GuardService;
 import com.example.web.service.admin.AdminProductoService;
@@ -57,4 +58,11 @@ public class AdminProductoController {
     service.delete(id);
     return ResponseEntity.noContent().build();
   }
+  @GetMapping("/activos")
+    public List<ComboDTO> activos(
+            @RequestHeader(name = "Authorization", required = false) String authHeader
+    ) {
+        guard.requireEmpleado(authHeader);
+        return service.listarActivosCombo();
+    }
 }

@@ -27,23 +27,23 @@ public class AdminClienteService {
 
   @Transactional(readOnly = true)
 public List<ClienteAdminDTO> list() {
-  return clienteRepo.findByEstadoTrue().stream()        // 👈 solo clientes activos
+  return clienteRepo.findByEstadoTrue().stream()     
       .map(c -> {
         if (c.getIdUsuario() == null) {
-          return null; // si no tiene usuario, no lo listamos
+          return null;
         }
 
         Usuario u = usuarioRepo
-            .findByIdAndEstadoTrue(c.getIdUsuario())    // 👈 solo usuario activo
+            .findByIdAndEstadoTrue(c.getIdUsuario())   
             .orElse(null);
 
         if (u == null) {
-          return null;  // usuario inactivo o no encontrado ⇒ no se lista
+          return null; 
         }
 
         return ClienteAdminDTO.of(c, u);
       })
-      .filter(Objects::nonNull)                         // quitamos los null
+      .filter(Objects::nonNull)                   
       .toList();
 }
 

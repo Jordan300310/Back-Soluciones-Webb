@@ -2,6 +2,8 @@ package com.example.web.service.admin;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.web.dto.common.ComboDTO;
 import com.example.web.models.Proveedor.Proveedor;
 import com.example.web.repository.proveedor.ProveedorRepository;
 
@@ -23,6 +25,17 @@ public class AdminProveedorService {
     }
     return repo.save(p);
   }
+     @Transactional(readOnly = true)
+    public List<ComboDTO> listarActivosCombo() {
+        return repo.findAll().stream()
+            // 🔴 CAMBIA getEstado() por getActivo() o el boolean que tengas
+            .filter(p -> Boolean.TRUE.equals(p.getEstado()))
+            .map(p -> new ComboDTO(
+                p.getId(),
+                p.getRazonSocial()  // o p.getNombre() si se llama distinto
+            ))
+            .toList();
+    }
 
   @Transactional(readOnly = true)
   public List<Proveedor> list() {
