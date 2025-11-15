@@ -28,7 +28,6 @@ public class AdminProductoService {
   @Transactional(readOnly = true)
     public List<ComboDTO> listarActivosCombo() {
         return repo.findAll().stream()
-            // 🔴 CAMBIA getEstado() por getActivo() o el boolean que tengas
             .filter(p -> Boolean.TRUE.equals(p.getEstado()))
             .map(p -> new ComboDTO(
                 p.getId(),

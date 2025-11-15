@@ -84,8 +84,6 @@ public class AdminCompraService {
 
       subtotal = subtotal.add(line);
     }
-
-    //BigDecimal igv = subtotal.multiply(IGV_RATE).setScale(2, BigDecimal.ROUND_HALF_UP);
     
     BigDecimal igv = subtotal.multiply(IGV_RATE).setScale(2, RoundingMode.HALF_UP);
     BigDecimal total = subtotal.add(igv);
