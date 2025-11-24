@@ -1,51 +1,52 @@
 package com.example.web.dto.venta;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public class CheckoutResponse {
-    private Long ventaId;
-    private String serieComprobante;
-    private String numeroComprobante;
-    private LocalDateTime fechaEmision;
+    private String initPoint; // URL de pago de Mercado Pago
+    private String preferenceId; // ID de la preferencia de Mercado Pago
     private BigDecimal total;
+    private Long checkoutPendienteId; // ID del checkout pendiente
 
-    public CheckoutResponse(Long ventaId, String serie, String numero, LocalDateTime fecha, BigDecimal total) {
-        this.ventaId = ventaId;
-        this.serieComprobante = serie;
-        this.numeroComprobante = numero;
-        this.fechaEmision = fecha;
+    public CheckoutResponse() {
+    }
+
+    public CheckoutResponse(String initPoint, String preferenceId, BigDecimal total, Long checkoutPendienteId) {
+        this.initPoint = initPoint;
+        this.preferenceId = preferenceId;
         this.total = total;
+        this.checkoutPendienteId = checkoutPendienteId;
     }
 
-    public Long getVentaId() {
-        return ventaId;
+    public String getInitPoint() {
+        return initPoint;
     }
-    public void setVentaId(Long ventaId) {
-        this.ventaId = ventaId;
+
+    public void setInitPoint(String initPoint) {
+        this.initPoint = initPoint;
     }
-    public String getSerieComprobante() {
-        return serieComprobante;
+
+    public String getPreferenceId() {
+        return preferenceId;
     }
-    public void setSerieComprobante(String serieComprobante) {
-        this.serieComprobante = serieComprobante;
+
+    public void setPreferenceId(String preferenceId) {
+        this.preferenceId = preferenceId;
     }
-    public String getNumeroComprobante() {
-        return numeroComprobante;
-    }
-    public void setNumeroComprobante(String numeroComprobante) {
-        this.numeroComprobante = numeroComprobante;
-    }
-    public LocalDateTime getFechaEmision() {
-        return fechaEmision;
-    }
-    public void setFechaEmision(LocalDateTime fechaEmision) {
-        this.fechaEmision = fechaEmision;
-    }
+
     public BigDecimal getTotal() {
         return total;
     }
+
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public Long getCheckoutPendienteId() {
+        return checkoutPendienteId;
+    }
+
+    public void setCheckoutPendienteId(Long checkoutPendienteId) {
+        this.checkoutPendienteId = checkoutPendienteId;
     }
 }

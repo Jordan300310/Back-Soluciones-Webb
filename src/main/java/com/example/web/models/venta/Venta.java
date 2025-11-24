@@ -37,10 +37,27 @@ public class Venta {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal total;
-    @Column(name="direccion") private String direccion;
-    @Column(name = "ciudad") private String ciudad;
-    @Column(name = "pais") private String pais;
-    @Column(name = "codigo_postal") private String codigoPostal;
+    @Column(name = "direccion")
+    private String direccion;
+    @Column(name = "ciudad")
+    private String ciudad;
+    @Column(name = "pais")
+    private String pais;
+    @Column(name = "codigo_postal")
+    private String codigoPostal;
+
+    // Campos de Mercado Pago
+    @Column(name = "mercadopago_preference_id")
+    private String mercadoPagoPreferenceId;
+
+    @Column(name = "mercadopago_payment_id")
+    private String mercadoPagoPaymentId;
+
+    @Column(name = "estado_pago", length = 20)
+    private String estadoPago; // PENDING, APPROVED, REJECTED, CANCELLED
+
+    @Column(name = "metodo_pago", length = 50)
+    private String metodoPago;
 
     // Relación con Cliente: Una venta pertenece a un cliente
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,5 +71,5 @@ public class Venta {
     // Relación con Comprobante: Una venta tiene un comprobante
     @OneToOne(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Comprobante comprobante;
- 
+
 }

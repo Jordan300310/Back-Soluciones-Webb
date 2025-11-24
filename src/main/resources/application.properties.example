@@ -1,0 +1,33 @@
+# Configuración de Mercado Pago
+# Copia este archivo a application.properties y completa los valores
+
+# ============================================
+# MERCADO PAGO CONFIGURATION
+# ============================================
+
+# Access Token de Mercado Pago (REQUERIDO)
+# Obtén tu access token desde: https://www.mercadopago.com.pe/developers/panel/credentials
+mercadopago.access.token=TU_ACCESS_TOKEN_AQUI
+
+# URLs de redirección después del pago
+# Estas URLs deben apuntar a tu frontend
+mercadopago.success.url=http://localhost:3000/checkout/success
+mercadopago.failure.url=http://localhost:3000/checkout/failure
+mercadopago.pending.url=http://localhost:3000/checkout/pending
+
+# URL del webhook para recibir notificaciones de Mercado Pago (REQUERIDO)
+# Esta debe ser una URL pública accesible desde internet
+# Ejemplo: https://tu-dominio.com/api/v1/webhooks/mercadopago
+# Para desarrollo local, puedes usar ngrok: https://ngrok.com/
+mercadopago.notification.url=https://conclusionally-uncabled-spencer.ngrok-free.dev/api/v1/webhooks/mercadopago
+
+# ============================================
+# NOTAS IMPORTANTES
+# ============================================
+# 1. El access token es OBLIGATORIO para que funcione la integración
+# 2. La notification.url DEBE ser una URL pública (no localhost)
+# 3. Para desarrollo local, usa ngrok para exponer tu servidor:
+#    ngrok http 8080
+#    Luego usa la URL de ngrok como notification.url
+# 4. Configura el webhook en Mercado Pago:
+#    https://www.mercadopago.com.pe/developers/panel/webhooks
