@@ -16,4 +16,10 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
 
     @Query("SELECT COUNT(v) FROM Venta v WHERE v.fechaVenta BETWEEN :start AND :end")
     Long countByFechaVentaBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    @Query(value = "SELECT TO_CHAR(v.fecha_venta, 'YYYY-MM-DD') as fecha, SUM(v.total) " +
+                   "FROM venta v " +
+                   "WHERE v.fecha_venta >= :start " +
+                   "GROUP BY TO_CHAR(v.fecha_venta, 'YYYY-MM-DD') " +
+                   "ORDER BY fecha ASC", nativeQuery = true)
+    List<Object[]> findVentasUltimosDias(@Param("start") LocalDateTime start);
 }

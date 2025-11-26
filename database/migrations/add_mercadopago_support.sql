@@ -45,3 +45,15 @@ COMMENT ON COLUMN venta.mercadopago_preference_id IS 'ID de la preferencia de pa
 COMMENT ON COLUMN venta.mercadopago_payment_id IS 'ID del pago confirmado en Mercado Pago';
 COMMENT ON COLUMN venta.estado_pago IS 'Estado del pago: PENDING, APPROVED, REJECTED, CANCELLED';
 COMMENT ON COLUMN venta.metodo_pago IS 'Método de pago utilizado (tarjeta, efectivo, etc.)';
+-- 6. Índices adicionales para optimización de consultas
+CREATE INDEX IF NOT EXISTS idx_venta_fecha_venta ON venta(fecha_venta);
+CREATE INDEX IF NOT EXISTS idx_venta_estado_pago ON venta(estado_pago);
+CREATE INDEX IF NOT EXISTS idx_venta_metodo_pago ON venta(metodo_pago);
+
+CREATE INDEX IF NOT EXISTS idx_venta_item_venta_id ON venta_item(venta_id);
+CREATE INDEX IF NOT EXISTS idx_venta_item_producto_id ON venta_item(producto_id);
+
+CREATE INDEX IF NOT EXISTS idx_producto_stock ON producto(stock);
+
+CREATE INDEX IF NOT EXISTS idx_checkout_estado ON checkout_pendiente(estado);
+CREATE INDEX IF NOT EXISTS idx_checkout_fecha_creacion ON checkout_pendiente(fecha_creacion);
