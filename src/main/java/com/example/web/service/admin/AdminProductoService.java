@@ -6,7 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.web.dto.common.ComboDTO;
 import com.example.web.models.Producto.Producto;
 import com.example.web.repository.producto.ProductoRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -70,4 +73,20 @@ public class AdminProductoService {
       repo.save(db);
     }
   }
-}
+  public List<Producto> top5MasVendidos(){
+    Pageable topFive = PageRequest.of(0, 5);
+    return repo.findProductosMasVendidos(topFive);
+  }
+  public List<Producto> filtrarProductos(String texto, List<String> marcas, List<String> categorias, BigDecimal min, BigDecimal max) {
+        if (marcas != null && marcas.isEmpty()) marcas = null;
+        if (categorias != null && categorias.isEmpty()) categorias = null;
+        if (texto != null && !texto.trim().isEmpty()) {
+            texto = "%" + texto.toLowerCase() + "%";
+        } else {
+            texto = null;
+        }
+
+        return repo.filtrarProductos(texto, marcas, categorias, min, max);
+    }
+
+ }
