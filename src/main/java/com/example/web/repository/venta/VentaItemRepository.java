@@ -21,9 +21,10 @@ public interface VentaItemRepository extends JpaRepository<VentaItem, Long> {
 
     @Query("SELECT p.categoria, SUM(vi.cantidad * vi.precioUnitario) " +
            "FROM VentaItem vi JOIN vi.producto p " +
+           "WHERE vi.venta.fechaVenta BETWEEN :start AND :end " +
            "GROUP BY p.categoria " +
            "ORDER BY SUM(vi.cantidad * vi.precioUnitario) DESC")
-    List<Object[]> findVentasPorCategoria();
+    List<Object[]> findVentasPorCategoriaBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT vi.producto.id, vi.producto.nombre, SUM(vi.cantidad), SUM(vi.precioUnitario * vi.cantidad) " +
            "FROM VentaItem vi " +

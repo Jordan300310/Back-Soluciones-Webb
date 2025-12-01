@@ -24,17 +24,23 @@ public class AdminDashboardResolver {
     }
 
     @QueryMapping
-    public DashboardResponse adminDashboard(@ContextValue(name = AuthorizationInterceptor.AUTH_CONTEXT_KEY) String authHeader) {
+    public DashboardResponse adminDashboard(
+            @Argument String fechaInicio,  
+            @Argument String fechaFin,    
+            @ContextValue(name = AuthorizationInterceptor.AUTH_CONTEXT_KEY) String authHeader
+    ) {
         guard.requireAdmin(authHeader);
-        return service.getDashboardForCurrentMonth();
+        return service.getDashboardData(fechaInicio, fechaFin);
     }
 
     @QueryMapping
     public List<TopProductoDTO> detalleCategoria(
-            @Argument String categoria, 
+            @Argument String categoria,
+            @Argument String fechaInicio, 
+            @Argument String fechaFin,
             @ContextValue(name = AuthorizationInterceptor.AUTH_CONTEXT_KEY) String authHeader
     ) {
         guard.requireAdmin(authHeader);
-        return service.getDetalleCategoria(categoria);
+        return service.getDetalleCategoria(categoria, fechaInicio, fechaFin);
     }
 }

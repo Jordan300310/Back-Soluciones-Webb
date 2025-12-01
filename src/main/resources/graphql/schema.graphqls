@@ -35,19 +35,19 @@ type DashboardResponse {
     gananciasMes: BigDecimal
     topProductos: [TopProducto]
     
-    # Gráficos y Tablas Nuevas
-    ventasUltimos7Dias: [VentaDiariaDTO]
+    # Gráficos Dinámicos
+    # Antes se llamaba ventasUltimos7Dias, ahora lo hacemos genérico para la línea de tiempo
+    ventasPorPeriodo: [VentaDiariaDTO] 
+    
     ventasPorCategoria: [VentaCategoriaDTO]
     productosBajoStock: [ProductoResumenDTO]
     productosSinVentas: [ProductoResumenDTO]
 }
 
-# 3. Consultas (Queries)
 type Query {
-    # Dashboard Principal
-    adminDashboard: DashboardResponse!
-    
-    # NUEVA QUERY: Detalle al hacer clic en una categoría
-    # Recibe el nombre de la categoría y devuelve una lista de productos
-    detalleCategoria(categoria: String!): [TopProducto]
+    # Acepta fechas en formato String "YYYY-MM-DD"
+    # Si son nulos, el back tomará el mes actual por defecto
+    adminDashboard(fechaInicio: String, fechaFin: String): DashboardResponse!
+
+    detalleCategoria(categoria: String!, fechaInicio: String, fechaFin: String): [TopProducto]
 }

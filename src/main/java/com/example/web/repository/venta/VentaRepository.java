@@ -22,4 +22,10 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
                    "GROUP BY TO_CHAR(v.fecha_venta, 'YYYY-MM-DD') " +
                    "ORDER BY fecha ASC", nativeQuery = true)
     List<Object[]> findVentasUltimosDias(@Param("start") LocalDateTime start);
+    @Query("SELECT v.fechaVenta, SUM(v.total) " +
+        "FROM Venta v " +
+        "WHERE v.fechaVenta BETWEEN :inicio AND :fin " +
+        "GROUP BY v.fechaVenta " +
+        "ORDER BY v.fechaVenta ASC")
+    List<Object[]> findVentasPorRango(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 }
