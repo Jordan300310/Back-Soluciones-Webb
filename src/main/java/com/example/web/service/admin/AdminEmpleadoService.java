@@ -15,7 +15,7 @@ import com.example.web.repository.auth.EmpleadoRepository;
 import com.example.web.repository.auth.UsuarioRepository;
 import java.util.Objects;
 import java.util.List;
-
+import java.time.LocalDate;
 @Service
 public class AdminEmpleadoService {
 
@@ -40,6 +40,9 @@ public EmpleadoAdminDTO crear(CrearEmpleadoRequest r) {
 
   if (r.password() == null || r.password().isBlank())
     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password requerida");
+  if (r.fen() != null && r.fen().isAfter(LocalDate.now())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de nacimiento no puede ser mayor a la fecha actual");
+    }
 
   if (r.email() != null && !r.email().isBlank()) {
     String email = r.email().trim();
@@ -124,6 +127,12 @@ public List<EmpleadoAdminDTO> list() {
     empleadoRepo.save(e);
 
     Usuario u = null;
+    if (in.fen() != null) {
+        if (in.fen().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de nacimiento no puede ser mayor a la fecha actual");
+        }
+        e.setFen(in.fen());
+    }
     if (e.getIdUsuario() != null) {
       u = usuarioRepo.findById(e.getIdUsuario()).orElse(null);
       if (u != null) {

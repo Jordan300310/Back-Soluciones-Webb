@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto> findByEstadoTrue();
+    List<Producto> findByEstadoTrueAndPrecioGreaterThan(BigDecimal precio);
     List<Producto> findByStockLessThanAndEstadoTrueOrderByStockAsc(Integer stockLimite);
     @Query("SELECT p FROM Producto p " +
            "WHERE p.stock > 0 AND p.estado = true " +

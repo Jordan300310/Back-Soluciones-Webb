@@ -21,7 +21,7 @@ public class PublicProductoController {
 
   @GetMapping
   public List<ProductoAdminDTO> listarPublicos() {
-    return service.list().stream()
+    return service.listPublic().stream()
         .map(ProductoAdminDTO::of)
         .toList();
   }

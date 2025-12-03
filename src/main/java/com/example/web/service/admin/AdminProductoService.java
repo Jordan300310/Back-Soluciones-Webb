@@ -43,6 +43,10 @@ public class AdminProductoService {
   public List<Producto> list() {
     return repo.findByEstadoTrue();
   }
+  @Transactional(readOnly = true)
+    public List<Producto> listPublic() {
+        return repo.findByEstadoTrueAndPrecioGreaterThan(BigDecimal.ZERO);
+    }
 
   @Transactional(readOnly = true)
   public Producto get(Long id) {

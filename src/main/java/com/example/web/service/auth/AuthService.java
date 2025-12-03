@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,11 @@ public class AuthService {
   @Transactional
   public RegisterResponse registerCliente(RegisterRequest r) {
 
+    if (r.fen() == null)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fecha de nacimiento requerida");
+    if (r.fen().isAfter(LocalDate.now())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de nacimiento no puede ser mayor a la fecha actual");
+    }
     if (r.username() == null || r.username().isBlank())
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username requerido");
 
