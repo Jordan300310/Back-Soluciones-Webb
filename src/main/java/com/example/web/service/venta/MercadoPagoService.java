@@ -64,7 +64,6 @@ public class MercadoPagoService {
                 mpItems.add(itemRequest);
             }
 
-            // URLs de retorno
             PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
                     .success(mpConfig.getSuccessUrl())
                     .failure(mpConfig.getFailureUrl())
@@ -77,7 +76,6 @@ public class MercadoPagoService {
                     mpConfig.getPendingUrl(),
                     mpConfig.getNotificationUrl());
 
-            // Construir la preferencia
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(mpItems)
                     .backUrls(backUrls)
@@ -88,7 +86,6 @@ public class MercadoPagoService {
 
             logger.info("Enviando request a Mercado Pago...");
 
-            // Crear la preferencia en Mercado Pago
             PreferenceClient client = new PreferenceClient();
             Preference preference = client.create(preferenceRequest);
 

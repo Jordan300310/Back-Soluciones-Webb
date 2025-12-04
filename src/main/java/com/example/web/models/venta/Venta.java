@@ -46,7 +46,6 @@ public class Venta {
     @Column(name = "codigo_postal")
     private String codigoPostal;
 
-    // Campos de Mercado Pago
     @Column(name = "mercadopago_preference_id")
     private String mercadoPagoPreferenceId;
 
@@ -54,21 +53,18 @@ public class Venta {
     private String mercadoPagoPaymentId;
 
     @Column(name = "estado_pago", length = 20)
-    private String estadoPago; // PENDING, APPROVED, REJECTED, CANCELLED
+    private String estadoPago;
 
     @Column(name = "metodo_pago", length = 50)
     private String metodoPago;
 
-    // Relación con Cliente: Una venta pertenece a un cliente
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    // Relación con VentaItem: Una venta tiene muchos items
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VentaItem> items;
 
-    // Relación con Comprobante: Una venta tiene un comprobante
     @OneToOne(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Comprobante comprobante;
 

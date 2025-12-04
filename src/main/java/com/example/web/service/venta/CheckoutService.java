@@ -66,11 +66,9 @@ public class CheckoutService {
     @Transactional
     public CheckoutResponse realizarCheckout(CheckoutRequest request, Long idUsuario) {
         try {
-            // 1) Obtener cliente
             Cliente cliente = clienteRepository.findByIdUsuario(idUsuario)
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-            // 2) Validar productos y calcular total
             BigDecimal totalVenta = BigDecimal.ZERO;
             List<Producto> productos = new ArrayList<>();
 
@@ -87,7 +85,6 @@ public class CheckoutService {
                 totalVenta = totalVenta.add(subtotalItem);
             }
 
-            // 3) Crear checkout pendiente
             CheckoutPendiente checkoutPendiente = new CheckoutPendiente();
             checkoutPendiente.setCliente(cliente);
             checkoutPendiente.setDireccion(request.getDireccion());
@@ -99,7 +96,6 @@ public class CheckoutService {
             checkoutPendiente.setFechaCreacion(LocalDateTime.now());
             checkoutPendiente.setFechaExpiracion(LocalDateTime.now().plusHours(24));
 
-            // Serializar items a JSON
             try {
                 String itemsJson = objectMapper.writeValueAsString(request.getItems());
                 checkoutPendiente.setItemsJson(itemsJson);
@@ -107,21 +103,17 @@ public class CheckoutService {
                 throw new RuntimeException("Error al serializar items", e);
             }
 
-            // Guardar temporalmente sin preferenceId
             CheckoutPendiente checkoutGuardado = checkoutPendienteRepository.save(checkoutPendiente);
 
-            // 4) Crear preferencia en Mercado Pago
             String externalReference = "CHECKOUT-" + checkoutGuardado.getId();
             Preference preference = mercadoPagoService.crearPreferencia(
                     request.getItems(),
                     productos,
                     externalReference);
 
-            // 5) Actualizar checkout pendiente con preferenceId
             checkoutGuardado.setPreferenceId(preference.getId());
             checkoutPendienteRepository.save(checkoutGuardado);
 
-            // 6) Devolver respuesta con URL de pago
             return new CheckoutResponse(
                     preference.getInitPoint(),
                     preference.getId(),
@@ -139,7 +131,6 @@ public class CheckoutService {
     @Transactional
     public Venta confirmarVenta(String preferenceId, String paymentId, String paymentStatus, String paymentMethod) {
 
-        // 1) Buscar checkout pendiente
         CheckoutPendiente checkoutPendiente = checkoutPendienteRepository.findByPreferenceId(preferenceId)
                 .orElseThrow(() -> new RuntimeException("Checkout pendiente no encontrado"));
 
@@ -147,7 +138,6 @@ public class CheckoutService {
             throw new RuntimeException("Este checkout ya fue procesado");
         }
 
-        // 2) Deserializar items
         List<VentaItemRequest> items;
         try {
             items = objectMapper.readValue(
@@ -157,7 +147,6 @@ public class CheckoutService {
             throw new RuntimeException("Error al deserializar items", e);
         }
 
-        // 3) Crear venta
         Venta nuevaVenta = new Venta();
         nuevaVenta.setCliente(checkoutPendiente.getCliente());
         nuevaVenta.setFechaVenta(LocalDateTime.now());
@@ -173,7 +162,6 @@ public class CheckoutService {
         BigDecimal totalVenta = BigDecimal.ZERO;
         List<VentaItem> itemsParaGuardar = new ArrayList<>();
 
-        // 4) Procesar items y reducir stock
         for (VentaItemRequest itemReq : items) {
             Producto producto = productoRepository.findById(itemReq.getProductoId())
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + itemReq.getProductoId()));
@@ -200,7 +188,6 @@ public class CheckoutService {
         nuevaVenta.setItems(itemsParaGuardar);
         Venta ventaGuardada = ventaRepository.save(nuevaVenta);
 
-        // 5) Crear comprobante
         Comprobante comprobante = new Comprobante();
         comprobante.setVenta(ventaGuardada);
         comprobante.setFechaEmision(LocalDateTime.now());
@@ -219,7 +206,6 @@ public class CheckoutService {
         comprobanteRepository.save(comprobante);
         ventaGuardada.setComprobante(comprobante);
 
-        // 6) Marcar checkout como completado
         checkoutPendiente.setEstado("COMPLETED");
         checkoutPendienteRepository.save(checkoutPendiente);
 
@@ -234,7 +220,6 @@ public class CheckoutService {
     public Venta confirmarVentaPorExternalReference(String externalReference, String paymentId, String paymentStatus,
             String paymentMethod) {
 
-        // Extraer el ID del checkout pendiente del external reference
         if (externalReference == null || !externalReference.startsWith("CHECKOUT-")) {
             throw new RuntimeException("External reference inválido: " + externalReference);
         }
@@ -247,12 +232,10 @@ public class CheckoutService {
             throw new RuntimeException("ID de checkout inválido en external reference: " + externalReference, e);
         }
 
-        // Buscar checkout pendiente por ID
         CheckoutPendiente checkoutPendiente = checkoutPendienteRepository.findById(checkoutPendienteId)
                 .orElseThrow(
                         () -> new RuntimeException("Checkout pendiente no encontrado con ID: " + checkoutPendienteId));
 
-        // Usar el preferenceId del checkout para llamar al método original
         return confirmarVenta(checkoutPendiente.getPreferenceId(), paymentId, paymentStatus, paymentMethod);
     }
 

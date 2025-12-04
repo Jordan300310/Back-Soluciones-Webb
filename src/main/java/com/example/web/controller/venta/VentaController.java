@@ -25,10 +25,8 @@ public class VentaController {
             @PathVariable Long id,
             @RequestHeader(name = "Authorization", required = false) String authHeader) {
         try {
-            // 1) Debe ser CLIENTE
             var su = guard.requireCliente(authHeader);
 
-            // 2) Validar pertenencia usando idUsuario
             ComprobanteDTO dto = checkoutService.getVentaComoCliente(id, su.idUsuario());
             return ResponseEntity.ok(dto);
 

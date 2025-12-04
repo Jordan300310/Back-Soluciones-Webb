@@ -32,12 +32,10 @@ public class VentaItem {
     @Column(name = "precio_unitario", precision = 10, scale = 2)
     private BigDecimal precioUnitario;
 
-    // Relación con Venta: Muchos items pertenecen a una Venta
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id", nullable = false)
     private Venta venta;
 
-    // Relación con Producto: Un item corresponde a un Producto
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;

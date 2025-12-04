@@ -30,7 +30,7 @@ public class CheckoutPendiente {
     private Long id;
 
     @Column(name = "preference_id", unique = true)
-    private String preferenceId; // Nullable temporalmente, se establece después de crear la preferencia en MP
+    private String preferenceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -38,7 +38,7 @@ public class CheckoutPendiente {
 
     @Lob
     @Column(name = "items_json", nullable = false, columnDefinition = "TEXT")
-    private String itemsJson; // JSON con los items del carrito
+    private String itemsJson;
 
     @Column(name = "direccion")
     private String direccion;

@@ -28,16 +28,13 @@ public class CheckoutController {
             @RequestBody CheckoutRequest request) {
 
         try {
-            // 1) Validar JWT y rol CLIENTE
             var su = guard.requireCliente(authHeader);
 
-            // 2) Pasar idUsuario al servicio (NO email)
-            CheckoutResponse response =
-                checkoutService.realizarCheckout(request, su.idUsuario());
+            CheckoutResponse response = checkoutService.realizarCheckout(request, su.idUsuario());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (ResponseStatusException e) { 
+        } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
