@@ -1,17 +1,14 @@
 package com.example.web.controller.admin;
-
 import java.util.List;
 import org.springframework.graphql.data.method.annotation.Argument; 
 import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-
 import com.example.web.config.AuthorizationInterceptor;
 import com.example.web.dto.admin.DashboardResponse;
 import com.example.web.dto.admin.TopProductoDTO; 
 import com.example.web.service.admin.AdminDashboardService;
 import com.example.web.service.auth.GuardService;
-
 @Controller
 public class AdminDashboardResolver {
 

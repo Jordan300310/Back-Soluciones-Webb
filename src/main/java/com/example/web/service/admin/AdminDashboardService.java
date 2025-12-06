@@ -34,51 +34,39 @@ public class AdminDashboardService {
 
     public DashboardResponse getDashboardData(String fechaInicioStr, String fechaFinStr) {
         
-        // 1. Lógica de Fechas
         LocalDateTime start;
         LocalDateTime end;
 
         if (fechaInicioStr != null && fechaFinStr != null) {
-            // Caso: El usuario seleccionó un rango en el calendario
             LocalDate fi = LocalDate.parse(fechaInicioStr);
             LocalDate ff = LocalDate.parse(fechaFinStr);
             start = fi.atStartOfDay();
             end = ff.atTime(LocalTime.MAX);
         } else {
-            // Caso: Default (Carga inicial) -> Mes Actual
             LocalDate now = LocalDate.now();
             start = now.withDayOfMonth(1).atStartOfDay();
             end = start.plusMonths(1).minusNanos(1);
         }
 
-        // 2. Métricas Generales (Usando el rango definido arriba)
         BigDecimal ganancias = ventaRepository.sumTotalBetween(start, end);
-        // Manejo de null por si no hay ventas en ese rango
         if (ganancias == null) ganancias = BigDecimal.ZERO; 
         
         Long ventasCount = ventaRepository.countByFechaVentaBetween(start, end);
 
-        // 3. Top Productos (Usando el rango)
         List<Object[]> rows = ventaItemRepository.findTopProductosBetween(start, end, PageRequest.of(0, 5));
         List<TopProductoDTO> top = mapTopProductos(rows);
 
         DashboardResponse response = new DashboardResponse(ventasCount, ganancias, top);
 
-        // 4. GRÁFICO DE LÍNEA DE TIEMPO (Ventas por periodo seleccionado)
-        // Esto alimentará tu gráfico de línea superior
-        List<Object[]> rowsDias = ventaRepository.findVentasPorRango(start, end); // Usar la query nueva del paso 3
+
+        List<Object[]> rowsDias = ventaRepository.findVentasPorRango(start, end); 
         List<VentaDiariaDTO> dias = new ArrayList<>();
         for (Object[] r : rowsDias) {
-            // Asumiendo que r[0] viene como Date o Timestamp, convertir a String
             String fecha = r[0].toString(); 
             BigDecimal total = r[1] == null ? BigDecimal.ZERO : (BigDecimal)r[1];
             dias.add(new VentaDiariaDTO(fecha, total));
         }
         response.setVentasPorPeriodo(dias);
-
-        // 5. Categorías (Usando el rango - OJO: Necesitas actualizar esta query en el repo también)
-        // Deberías crear un findVentasPorCategoriaBetween(start, end) en tu repo
-        // Si tu query actual no filtra por fecha, mostrará datos históricos totales, lo cual está mal para un filtro por mes.
         List<Object[]> rowsCat = ventaItemRepository.findVentasPorCategoriaBetween(start, end); 
         List<VentaCategoriaDTO> cats = new ArrayList<>();
         for (Object[] r : rowsCat) {
@@ -88,8 +76,6 @@ public class AdminDashboardService {
         }
         response.setVentasPorCategoria(cats);
 
-        // 6. Stock Bajo (Esto es una foto del momento actual, NO depende de fechas históricas)
-        // Se mantiene igual, ya que el stock es el que hay HOY.
         List<Producto> lowStock = productoRepository.findByStockLessThanAndEstadoTrueOrderByStockAsc(10);
         List<ProductoResumenDTO> lowStockDTO = lowStock.stream()
             .map(p -> new ProductoResumenDTO(p.getId(), p.getNombre(), p.getStock(), p.getPrecio())) 
@@ -97,10 +83,6 @@ public class AdminDashboardService {
             .toList();
         response.setProductosBajoStock(lowStockDTO);
 
-        // 7. Productos Sin Ventas (Zombies)
-        // Aquí podrías decidir: ¿Sin ventas en TODA la historia o sin ventas en el RANGO seleccionado?
-        // Usualmente "Zombies" son productos que no se mueven hace X tiempo fijo (ej. 30 días atrás desde hoy).
-        // Lo dejaremos relativo a HOY para detectar productos estancados reales.
         LocalDateTime hace30dias = LocalDateTime.now().minusDays(30);
         List<Producto> zombies = productoRepository.findProductosSinVentasDesde(hace30dias);
         List<ProductoResumenDTO> zombiesDTO = zombies.stream()
@@ -112,7 +94,6 @@ public class AdminDashboardService {
         return response;
     }
 
-    // Helper para mapear (para no repetir código)
     private List<TopProductoDTO> mapTopProductos(List<Object[]> rows) {
         List<TopProductoDTO> lista = new ArrayList<>();
         for (Object[] r : rows) {
@@ -124,8 +105,6 @@ public class AdminDashboardService {
         }
         return lista;
     }
-
-    // Actualizar detalle categoría para que respete las fechas también
     public List<TopProductoDTO> getDetalleCategoria(String categoria, String fInicio, String fFin) {
         LocalDateTime start;
         LocalDateTime end;

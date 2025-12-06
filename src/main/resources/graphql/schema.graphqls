@@ -1,9 +1,7 @@
 # src/main/resources/graphql/schema.graphqls
-
 # 1. Definición de Escalares (Tipos Java)
 scalar BigDecimal
 scalar Long
-
 # 2. Tipos de Objetos (DTOs)
 type TopProducto {
     productoId: ID
@@ -11,24 +9,20 @@ type TopProducto {
     cantidadVendida: Long
     totalVenta: BigDecimal
 }
-
 type VentaDiariaDTO {
     fecha: String
     total: BigDecimal
 }
-
 type VentaCategoriaDTO {
     categoria: String
     totalVenta: BigDecimal
 }
-
 type ProductoResumenDTO {
     id: ID
     nombre: String
     stock: Int
     precio: BigDecimal
 }
-
 type DashboardResponse {
     # Métricas Generales
     ventasMes: Long
@@ -43,7 +37,6 @@ type DashboardResponse {
     productosBajoStock: [ProductoResumenDTO]
     productosSinVentas: [ProductoResumenDTO]
 }
-
 type Query {
     # Acepta fechas en formato String "YYYY-MM-DD"
     # Si son nulos, el back tomará el mes actual por defecto
